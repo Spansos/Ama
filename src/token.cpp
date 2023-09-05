@@ -1,4 +1,4 @@
-#include <tokens.hpp>
+#include <token.hpp>
 
 TokenType::TokenType(
     std::string name,

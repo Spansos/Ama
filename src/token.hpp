@@ -18,7 +18,6 @@ private:
 };
 
 
-
 class Token
 {
 public:
