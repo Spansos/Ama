@@ -10,6 +10,9 @@ public:
         std::string name,
         std::regex regex
     );
+    bool operator==(
+        const TokenType & lhs
+    ) const;
     std::string name( ) const;
     std::regex regex( ) const;
 private:

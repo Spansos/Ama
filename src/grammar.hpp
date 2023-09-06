@@ -1,32 +1,33 @@
 #pragma once
 
 #include <vector>
-#include "token.hpp"
+#include <variant>
+#include <string>
 
-class NonTerminalType
+template < class T >
+class TerminalType
 {
-private:
-    
     std::string name;
+    T match;
 };
+
 
 class NonTerminal
 {
-private:
-    NonTerminalType & type;
+    std::vector< std::variant<NonTerminal, Terminal> > 
 };
+
 
 class Rule
 {
 
 };
 
+
 class Grammar
 {
+    // terminals
     // non-terminals
-    // terminals (tokens)
-    const std::vector<TokenType> terminals;
     // rules
     // start non-terminal
-    const TokenType & start;
 };

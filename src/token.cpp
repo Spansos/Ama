@@ -8,6 +8,13 @@ TokenType::TokenType(
     _regex ( regex )
 { }
 
+bool TokenType::operator==(
+    const TokenType & lhs
+) const
+{
+    return _name == lhs.name( );
+}
+
 std::string TokenType::name( ) const {
     return _name;
 }
