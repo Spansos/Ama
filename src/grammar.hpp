@@ -3,7 +3,7 @@
 #include <vector>
 #include <variant>
 #include <string>
-#include <token.hpp>
+#include "token.hpp"
 
 class NonTerminalType
 {
@@ -26,7 +26,7 @@ class Rule
 public:
 private:
     NonTerminalType & lhs;
-    std::vector< std::variant<TokenType, NonTerminalType> > rhs;  
+    std::vector< std::variant<TokenType, NonTerminalType> > rhs;
 };
 
 
