@@ -3,18 +3,13 @@
 
 int main( )
 {
-    TokenType number( "number", std::regex( "[1-9]*" ) );
-    TokenType alphabetical( "alpha", std::regex( "[a-zA-Z]*" ) );
-    TokenType whitespace( "whitespace", std::regex( "[ \n\t]*" ) );
-
-    Lexer lexer( { number, alphabetical, whitespace } );
-
-    auto tokens = lexer.lex( "test   12414 wwwas..dfd sad829 h87efy" );
+    std::string code = "test*for<<-+   12414 wwwas..dfd sad829 h87efy";
+    auto tokens = lex( code );
 
     for ( const auto & token : tokens )
         std::cout
         << '<'
-        << token.type().name()
+        << static_cast<int>(token.type)
         << ':'
         << token.value()
         << '>'

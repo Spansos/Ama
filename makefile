@@ -1,22 +1,32 @@
-CC = g++
-CFLAGS = -g -Wall -O2
+CC     := g++ -std=c++20
+CFLAGS := -g -Wall -Wextra -Wpedantic -Werror -Og -Iinclude
 
-CPP_FILES = $(wildcard src/*.cpp)
-OBJ_FILES = $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
+# cpp and header files from own project
+CPP_FILES := $(wildcard src/*.cpp) $(wildcard src/*/*.cpp)
+HEADERS   := $(wildcard include/*.hpp) $(wildcard include/*/*.hpp)
 
-all: bin/main
+# # packages from package manager
+# PACKAGES := 
+# PKG_LIBS := $(shell pkg-config --libs $(PACKAGES))
+# CFLAGS   += $(shell pkg-config --cflags $(PACKAGES))
+
+# obj files. decided by cpp files, so last
+OBJ_FILES := $(patsubst src/%.cpp,obj/%.o,$(CPP_FILES))
 
 .PHONY: clean run
 
-run: bin/main
-	./bin/main
+all: bin/main.out
+
+run: bin/main.out
+	./bin/main.out
 
 clean:
-	rm ~/Documents/AmateurLang/obj/* -f
-	rm ~/Documents/AmateurLang/bin/* -f
+	rm obj/* -rf
+	rm bin/* -rf
 
-obj/%.o: src/%.cpp
-	$(CC) $(CFLAGS) -c $^ -o $@
+obj/%.o: src/%.cpp $(HEADERS)
+	mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-bin/main: $(OBJ_FILES)
-	$(CC) $(CFLAGS) $^ -o $@
+bin/main.out: $(OBJ_FILES)
+	$(CC) $(CFLAGS) $(PKG_LIBS) $^ -o $@

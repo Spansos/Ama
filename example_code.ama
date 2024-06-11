@@ -1,0 +1,39 @@
+struct gameObject {
+    void update[gameObject, vector(gameObject)];
+    mut i32 x, y;
+    
+    enum variant {
+        req void update(mut &gameObject, vector(gameObject))
+
+    }
+}
+
+void gameObject:update(gameObject self, vector(gameObject)) {
+    self.variant.update();
+}
+
+// gameObject variant implementation, could be in another file
+struct gameObject {
+    enum variant {
+        struct Player { }
+    }
+}
+
+void gameObject:variant:Player:update(
+    gameObject self,
+    vector(gameObject) objects
+) {
+
+}
+
+
+// testing how vectors may be implemented
+
+
+
+struct vector
+{
+    mut i32 length,
+    mut i32 capacity,
+    type T
+}
