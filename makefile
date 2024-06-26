@@ -2,8 +2,8 @@ CC     := g++ -std=c++20
 CFLAGS := -g -Wall -Wextra -Wpedantic -Werror -Og -Iinclude
 
 # cpp and header files from own project
-CPP_FILES := $(wildcard src/*.cpp) $(wildcard src/*/*.cpp)
-HEADERS   := $(wildcard include/*.hpp) $(wildcard include/*/*.hpp)
+CPP_FILES := $(wildcard src/*/*.cpp) $(wildcard src/*.cpp)
+HEADERS   := $(wildcard include/*/*.hpp) $(wildcard include/*.hpp)
 
 # # packages from package manager
 # PACKAGES := 

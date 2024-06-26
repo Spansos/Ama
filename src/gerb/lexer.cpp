@@ -1,13 +1,10 @@
-#include "gerb.hpp"
-
-#include <iostream>
+#include "gerb/lexer.hpp"
 
 std::vector<Token> tokenize( const std::string & gerb ) {
     std::vector<Token> tokens;
     
     auto i = gerb.begin();
     while ( i <= gerb.end() ) {
-        std::cout << *i << '\t' << i-gerb.begin() << std::endl;
         switch ( *i ) {
         case '(':
             tokens.push_back( Token{ .type=TokenType::BRACKET_OPEN, .capture="(" } );
@@ -99,15 +96,4 @@ std::vector<Token> tokenize( const std::string & gerb ) {
     }
 
     return tokens;
-}
-
-Gerb gerb( const std::string & gerb ) {
-    auto tokens = tokenize( gerb );
-
-    std::cout << "TOKENS:" << '\n';
-    for ( auto i : tokens ) {
-        std::cout << i.capture << '\t' << static_cast<int>(i.type) << std::endl;
-    }
-
-    return Gerb{};
 }

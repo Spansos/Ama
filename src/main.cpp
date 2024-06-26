@@ -1,4 +1,4 @@
-#include "gerb.hpp"
+#include "gerb/gerb.hpp"
 #include <fstream>
 #include <sstream>
 
