@@ -54,14 +54,14 @@ std::vector<Token> tokenize( const std::string & gerb ) {
             i++;
             break;
         case ' ': case '\t':
-            while ( *(++i) == ' ' || *i == '\t' );
+            while ( *++i == ' ' || *i == '\t' );
             break;
         case ';':
             while ( *(i++) != '\n' );
             break;
         case '"': {
             auto begin = i;
-            while ( *++i != '"' );
+            while ( *(i++) == '\\' || *i != '"' );
             i++;
             tokens.push_back( Token{ .type=TokenType::EXACT, .capture=std::string( begin, i ) } );
             break;
@@ -82,15 +82,15 @@ std::vector<Token> tokenize( const std::string & gerb ) {
         }
         default:
             auto begin = i;
-            if ( *i >= 'A' && *i <= 'Z' ) {
-                while ( *++i >= 'A' && *i <= 'Z' );
+            if ( ( *i >= 'A' && *i <= 'Z' ) || *i == '_' ) {
+                while ( ( *++i >= 'A' && *i <= 'Z' ) || *i == '_' );
                 i++;
                 tokens.push_back( Token{ .type=TokenType::TERMINAL, .capture=std::string( begin, i ) } );
                 break;
             }
-            else if ( *i >= 'a' && *i <= 'z' ) {
-                while ( *++i >= 'a' && *i <= 'z' );
-                i++;
+            else if ( ( *i >= 'a' && *i <= 'z' ) || *i == '-' ) {
+                while ( ( *++i >= 'a' && *i <= 'z' ) || *i == '-' );
+                // i++;
                 tokens.push_back( Token{ .type=TokenType::NON_TERMINAL, .capture=std::string( begin, i ) } );
                 break;
             }

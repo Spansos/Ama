@@ -40,16 +40,16 @@ TERMINAL     = "'" !"'"* "'" | [ABCDEFGHIJKLMNOPQRSTUVWXYZ_]+
 gerb = ( token? '\n' )* ( rule? '\n' )* 'eof'
 
 ; terminal rules
-token         = TERMINAL '=' token_expr
-token_expr    = token_or+
-token_or      = token_postfix ( '|' token_postfix )*
-token_postfix = token_prefix ( '*' | '+' | '?' )?
-token_prefix  = '!'? token_primary
-token_primary = '(' token_expr ')' | EXACT | UNION | '.'
+token         = TERMINAL '=' token-expr
+token-expr    = token-or+
+token-or      = token-postfix ( '|' token-postfix )*
+token-postfix = token-prefix ( '*' | '+' | '?' )?
+token-prefix  = '!'? token-primary
+token-primary = '(' token-expr ')' | EXACT | UNION | '.'
 
 ; non-terminal rules
-rule         =   NON_TERMINAL '=' rule_expr
-rule_expr    =   rule_or+
-rule_or      =   rule_postfix ( '|' rule_postfix )*
-rule_postfix =   rule_primary ( '*' | '+' | '?' )?
-rule_primary =   NON_TERMINAL | TERMINAL | '(' rule_expr ')'
+rule         =   NON_TERMINAL '=' rule-expr
+rule-expr    =   rule-or+
+rule-or      =   rule-postfix ( '|' rule-postfix )*
+rule-postfix =   rule-primary ( '*' | '+' | '?' )?
+rule-primary =   NON_TERMINAL | TERMINAL | '(' rule-expr ')'
