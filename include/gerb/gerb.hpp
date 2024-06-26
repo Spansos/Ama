@@ -1,6 +1,6 @@
 #pragma once
 
 #include <string>
-#include "gerb/gerb_ast.hpp"
+#include "gerb/ast.hpp"
 
 Gerb gerb( const std::string & gerb );

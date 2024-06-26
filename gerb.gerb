@@ -44,7 +44,7 @@ token         = TERMINAL '=' token-expr
 token-expr    = token-or+
 token-or      = token-postfix ( '|' token-postfix )*
 token-postfix = token-prefix ( '*' | '+' | '?' )?
-token-prefix  = '!'? token-primary
+token-prefix  = '!' token-prefix | token_primary
 token-primary = '(' token-expr ')' | EXACT | UNION | '.'
 
 ; non-terminal rules
