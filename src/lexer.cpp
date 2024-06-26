@@ -30,7 +30,6 @@ struct TokenPattern {
     }
 };
 
-// bug where && and such gets interpretted as & & and such
 std::vector<Token> lex (
     const std::string & code
 ) {
@@ -41,9 +40,19 @@ std::vector<Token> lex (
         TokenPattern{.allowed=":", .match_type=TokenPattern::exact_match, .type=TokenType::colon},
         TokenPattern{.allowed=".", .match_type=TokenPattern::exact_match, .type=TokenType::ampersand},
         TokenPattern{.allowed=",", .match_type=TokenPattern::exact_match, .type=TokenType::colon},
+        TokenPattern{.allowed=";", .match_type=TokenPattern::exact_match, .type=TokenType::semicolon},
         TokenPattern{.allowed="0123456789", .match_type=TokenPattern::allowed_chars, .type=TokenType::int_},
         TokenPattern{.allowed="", .match_type=TokenPattern::other, .type=TokenType::float_},
         TokenPattern{.allowed="", .match_type=TokenPattern::other, .type=TokenType::string_},
+        TokenPattern{.allowed="=", .match_type=TokenPattern::exact_match, .type=TokenType::asignment},
+        TokenPattern{.allowed="==", .match_type=TokenPattern::exact_match, .type=TokenType::equal},
+        TokenPattern{.allowed=">", .match_type=TokenPattern::exact_match, .type=TokenType::greater},
+        TokenPattern{.allowed="<", .match_type=TokenPattern::exact_match, .type=TokenType::lesser},
+        TokenPattern{.allowed=">=", .match_type=TokenPattern::exact_match, .type=TokenType::greaterequal},
+        TokenPattern{.allowed="<=", .match_type=TokenPattern::exact_match, .type=TokenType::lesserequal},
+        TokenPattern{.allowed="||", .match_type=TokenPattern::exact_match, .type=TokenType::or_},
+        TokenPattern{.allowed="&&", .match_type=TokenPattern::exact_match, .type=TokenType::and_},
+        TokenPattern{.allowed="^^", .match_type=TokenPattern::exact_match, .type=TokenType::xor_},
         TokenPattern{.allowed="-", .match_type=TokenPattern::exact_match, .type=TokenType::minus},
         TokenPattern{.allowed="+", .match_type=TokenPattern::exact_match, .type=TokenType::plus},
         TokenPattern{.allowed="/", .match_type=TokenPattern::exact_match, .type=TokenType::divide},
@@ -54,10 +63,15 @@ std::vector<Token> lex (
         TokenPattern{.allowed=">>", .match_type=TokenPattern::exact_match, .type=TokenType::rshift},
         TokenPattern{.allowed="<<", .match_type=TokenPattern::exact_match, .type=TokenType::lshift},
         TokenPattern{.allowed="|", .match_type=TokenPattern::exact_match, .type=TokenType::bor},
+        TokenPattern{.allowed="&", .match_type=TokenPattern::exact_match, .type=TokenType::band},
         TokenPattern{.allowed="^", .match_type=TokenPattern::exact_match, .type=TokenType::bxor},
         TokenPattern{.allowed="~", .match_type=TokenPattern::exact_match, .type=TokenType::bnot},
+        TokenPattern{.allowed="||=", .match_type=TokenPattern::exact_match, .type=TokenType::ora},
+        TokenPattern{.allowed="&&=", .match_type=TokenPattern::exact_match, .type=TokenType::anda},
+        TokenPattern{.allowed="^^=", .match_type=TokenPattern::exact_match, .type=TokenType::xora},
         TokenPattern{.allowed="-=", .match_type=TokenPattern::exact_match, .type=TokenType::minusa},
         TokenPattern{.allowed="+=", .match_type=TokenPattern::exact_match, .type=TokenType::plusa},
+        TokenPattern{.allowed="*=", .match_type=TokenPattern::exact_match, .type=TokenType::timesa},
         TokenPattern{.allowed="/=", .match_type=TokenPattern::exact_match, .type=TokenType::dividea},
         TokenPattern{.allowed="//=", .match_type=TokenPattern::exact_match, .type=TokenType::idividea},
         TokenPattern{.allowed="%=", .match_type=TokenPattern::exact_match, .type=TokenType::moduloa},
@@ -66,6 +80,7 @@ std::vector<Token> lex (
         TokenPattern{.allowed=">>=", .match_type=TokenPattern::exact_match, .type=TokenType::rshifta},
         TokenPattern{.allowed="<<=", .match_type=TokenPattern::exact_match, .type=TokenType::lshifta},
         TokenPattern{.allowed="|=", .match_type=TokenPattern::exact_match, .type=TokenType::bora},
+        TokenPattern{.allowed="&=", .match_type=TokenPattern::exact_match, .type=TokenType::banda},
         TokenPattern{.allowed="^=", .match_type=TokenPattern::exact_match, .type=TokenType::bxora},
         TokenPattern{.allowed="~=", .match_type=TokenPattern::exact_match, .type=TokenType::bnota},
         TokenPattern{.allowed="(", .match_type=TokenPattern::exact_match, .type=TokenType::bropen},

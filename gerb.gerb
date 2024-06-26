@@ -1,0 +1,55 @@
+; gerb comments
+;   ; comment
+
+; gerb token/terminal synstax
+;   'terminal' = "exact-match"
+;   'terminal' = [allowed chars]
+;   'terminal' = "more"* | [complicated]+ "expression"?
+;   'match-any' = .
+;   'terminal' = "\n" | "\\n"
+;   ALL_CAPS   = [captures what it matches]
+;   ''        = "ignore"
+
+'('  = "("
+')'  = ")"
+'='  = "="
+'|'  = "|"
+'*'  = "*"
+'+'  = "+"
+'?'  = "?"
+'!'  = "!"
+'.'  = "."
+'eof'= "\0"
+'\n' = "\n"
+''  = [ \t]+ | ";" .* "\n"
+EXACT        = "\"" !"\""* "\""
+UNION        = "[" !"]"* "]"
+NON_TERMINAL = [abcdefghijklmnopqrstuvwxyz-]+
+TERMINAL     = "'" !"'"* "'" | [ABCDEFGHIJKLMNOPQRSTUVWXYZ_]+
+
+; gerb rules syntax
+;   non-terminal = non-terminal
+;   non-terminal = 'terminal'
+;   non-terminal = 'or-option-1' | 'or-option-2' | or-option-3
+;   non-terminal = 'terminal'*
+; gerb precedence
+;   ()
+;   * ? +
+;   |
+
+gerb = ( token? '\n' )* ( rule? '\n' )* 'eof'
+
+; terminal rules
+token         = TERMINAL '=' token_expr
+token_expr    = token_or+
+token_or      = token_postfix ( '|' token_postfix )*
+token_postfix = token_prefix ( '*' | '+' | '?' )?
+token_prefix  = '!'? token_primary
+token_primary = '(' token_expr ')' | EXACT | UNION | '.'
+
+; non-terminal rules
+rule         =   NON_TERMINAL '=' rule_expr
+rule_expr    =   rule_or+
+rule_or      =   rule_postfix ( '|' rule_postfix )*
+rule_postfix =   rule_primary ( '*' | '+' | '?' )?
+rule_primary =   NON_TERMINAL | TERMINAL | '(' rule_expr ')'

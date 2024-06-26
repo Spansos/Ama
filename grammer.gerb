@@ -1,0 +1,27 @@
+; statement   = ( expression ';' ) | <code-block>
+; code-block  = { statement* }
+
+
+; precedence rules
+;   unary postfix   [] ()
+;   unary prefix    * & - + ! ~
+;   binary mult     * / // %
+;   binary add      + -
+;   binary shift    << >>
+;   binary binary   | & ^
+;   comparison      == !== > < >== <==
+;   logical         || && ^^
+;   assignment      = -= += *= /= //= %= != >>= <<= |= &= ^= ~= != >= <= >=== <=== a?b:c a?=b:c
+expression      = assignment
+assignment      = logical ( ( '=' | '-=' | '+=' | '/=' | '//=' | '%=' | '!=' | '>>=' | '<<=' | '|=' | '&=' | '^=' | '~=' | '!=' | '>=' | '<=' | '>===' | '<===' ) logical )* | logical ( '?' | '?=' ) logical ':' logical
+logical         = comparison ( ( '||' | '&&' | '^^' ) comparison )*
+comparison      = binary-binary ( ( '==' | '!==' | '>' | '<' | '>==' | '<==' ) binary-binary )*
+binary-binary   = binary-shift ( ( '|' | '&' | '^' ) binary-shift )*
+binary-shift    = binary-add ( ( '<<' | '>>' ) binary-add )*
+binary-add      = binary-mult ( ( '+' | '-' ) binary-mult )*
+binary-mult     = unary-prefix ( ( '*' | '/' | '//' | '%' ) unary-prefix )*
+unary-prefix    = ( '*' | '&' | '-' | '+' | '!' | '~' ) unary-prefix | unary-postfix
+unary-postfix   = unary-postfix '(' arguments ')' | unary-postfix '[' expression ']' | primary
+primary         = INT | FLOAT | STRING | IDENTIFIER | '(' expression ')'
+
+arguments = expression (',' expression)*
