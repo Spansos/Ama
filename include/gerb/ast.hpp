@@ -3,10 +3,11 @@
 #include <variant>
 #include <vector>
 #include <optional>
+#include <memory>
 #include "gerb/token.hpp"
 
 struct NonTerminalExpr;
-typedef std::variant<NonTerminalExpr*, Token> NonTerminalPrimary;
+typedef std::variant<std::unique_ptr<NonTerminalExpr>, Token> NonTerminalPrimary;
 
 struct NonTerminalPostfix {
     NonTerminalPrimary child;
@@ -27,16 +28,16 @@ struct NonTerminal {
 };
 
 struct TerminalExpr;
-typedef std::variant<TerminalExpr*, Token> TerminalPrimary;
+typedef std::variant<std::unique_ptr<TerminalExpr>, Token> TerminalPrimary;
 
 struct TerminalPrefix {
     TerminalPrimary child;
-    std::optional<TokenType> op;
+    std::optional<Token> op;
 };
 
 struct TerminalPostfix {
     TerminalPrefix child;
-    std::optional<TokenType> op;
+    std::optional<Token> op;
 };
 
 struct TerminalOr {
