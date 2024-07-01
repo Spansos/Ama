@@ -25,7 +25,7 @@
 EXACT        = "\"" !"\""* "\""
 UNION        = "[" !"]"* "]"
 NON_TERMINAL = [abcdefghijklmnopqrstuvwxyz-]+
-TERMINAL     = "'" !"'"* "'" | [ABCDEFGHIJKLMNOPQRSTUVWXYZ_]+
+TERMINAL     = ("'" !"'"* "'") | [ABCDEFGHIJKLMNOPQRSTUVWXYZ_]+
 
 ; gerb rules syntax
 ;   non-terminal = non-terminal
@@ -52,4 +52,4 @@ rule         =   NON_TERMINAL '=' rule-expr
 rule-expr    =   rule-or+
 rule-or      =   rule-postfix ( '|' rule-postfix )*
 rule-postfix =   rule-primary ( '*' | '+' | '?' )?
-rule-primary =   NON_TERMINAL | TERMINAL | '(' rule-expr ')'
+rule-primary =   NON_TERMINAL | TERMINAL | ( '(' rule-expr ')' )

@@ -2,12 +2,7 @@
 
 #include <optional>
 
-struct ParseError {
-    std::string error;
-    std::vector<Token>::const_iterator location;
-};
-
-#define RETURN_IF_ERROR( EXPR ) do { auto value = EXPR; if (std::holds_alternative<ParseError>(value)) return std::get<ParseError>(value); } while (0)
+#define RETURN_IF_ERROR( EXPR, IT, BEGIN ) do { auto value = EXPR; if (std::holds_alternative<ParseError>(value)) { IT = BEGIN; return std::get<ParseError>(value); } } while (0)
 
 ParseError & operator|( ParseError & lhs, ParseError & rhs ) {
     if ( lhs.location > rhs.location )
@@ -28,52 +23,127 @@ std::variant<Token, ParseError> consume( std::vector<Token>::const_iterator & it
         return token.value();
 
     std::string err = "expected ";
-    for ( auto type : types )
-        err += std::to_string( static_cast<int>(type) ) + ", ";
-    err += "at " + it->capture;
+    for ( auto i = types.begin(); i < types.end()-1; i++ )
+        err += std::to_string( *i ) + " or ";
+    err += std::to_string( *(types.end()-1) );
     return ParseError{ .error=err, .location=it };
 }
 
+std::variant<NonTerminalExpr, ParseError> non_terminal_expression( std::vector<Token>::const_iterator & it );
+
+std::variant<NonTerminalPrimary, ParseError> non_terminal_primary( std::vector<Token>::const_iterator & it ) {
+    auto begin = it;
+
+    auto token = consume( it, { TokenType::TERMINAL, TokenType::NON_TERMINAL, TokenType::BRACKET_OPEN } );
+    RETURN_IF_ERROR( token, it, begin );
+    
+    if ( std::get<Token>(token).type == TokenType::BRACKET_OPEN ) {
+        auto expr = non_terminal_expression( it );
+        RETURN_IF_ERROR( expr, it, begin );
+        RETURN_IF_ERROR( consume( it, { TokenType::BRACKET_CLOSE } ), it, begin );
+        return new NonTerminalExpr{std::get<NonTerminalExpr>(expr)};
+    }
+    return std::get<Token>(token);
+}
+
+std::variant<NonTerminalPostfix, ParseError> non_terminal_postfix( std::vector<Token>::const_iterator & it ) {
+    auto begin = it;
+    NonTerminalPostfix postfix;
+    
+    auto primary = non_terminal_primary( it );
+    RETURN_IF_ERROR( primary, it, begin );
+    postfix.child = std::get<NonTerminalPrimary>(primary);
+
+    postfix.op = match( it, { TokenType::STAR, TokenType::PLUS, TokenType::QUESTION_MARK } );
+
+    return postfix;
+}
+
+std::variant<NonTerminalOr, ParseError> non_terminal_or( std::vector<Token>::const_iterator & it ) {
+    auto begin = it;
+    NonTerminalOr term_or;
+    auto postfix = non_terminal_postfix( it );
+    RETURN_IF_ERROR( postfix, it, begin );
+    term_or.children.push_back( std::get<NonTerminalPostfix>(postfix));
+    
+    while ( match( it, { TokenType::BAR } ) ) {
+        auto child = non_terminal_postfix( it );
+        RETURN_IF_ERROR( child, it, begin );
+        term_or.children.push_back( std::get<NonTerminalPostfix>(child) );
+    }
+
+    return term_or;
+}
+
+std::variant<NonTerminalExpr, ParseError> non_terminal_expression( std::vector<Token>::const_iterator & it ) {
+    auto begin = it;
+    NonTerminalExpr expr;
+    auto term_or = non_terminal_or( it );
+    while ( std::holds_alternative<NonTerminalOr>(term_or) ) {
+        expr.children.push_back( std::get<NonTerminalOr>(term_or) );
+        term_or = non_terminal_or( it );
+    }
+    if ( expr.children.empty() ) {
+        it = begin;
+        return std::get<ParseError>(term_or);
+    }
+    return expr;
+}
+
 std::variant<NonTerminal, ParseError> non_terminal( std::vector<Token>::const_iterator & it ) {
-    NonTerminal non_term;
-    while ( (++it)->type != TokenType::END_OF_FILE );
-    return non_term;
+    auto begin = it;
+    NonTerminal nonterm;
+
+    auto nonterm_token = consume( it, { TokenType::NON_TERMINAL } );
+    RETURN_IF_ERROR( nonterm_token, it, begin );
+
+    auto equal_token = consume( it, { TokenType::EQUALS } );
+    RETURN_IF_ERROR( equal_token, it, begin );
+
+    auto expr = non_terminal_expression( it );
+    RETURN_IF_ERROR( expr, it, begin );
+    
+    nonterm.token = std::get<Token>( nonterm_token );
+    nonterm.expression = std::get<NonTerminalExpr>( expr );
+
+    return nonterm;
 }
 
 std::variant<TerminalExpr, ParseError> terminal_expression( std::vector<Token>::const_iterator & it );
 
 std::variant<TerminalPrimary, ParseError> terminal_primary( std::vector<Token>::const_iterator & it ) {
+    auto begin = it;
     auto token = consume( it, { TokenType::BRACKET_OPEN, TokenType::EXACT, TokenType::UNION, TokenType::DOT } );
-    RETURN_IF_ERROR( token );
+    RETURN_IF_ERROR( token, it, begin );
     
     if ( std::get<Token>(token).type == TokenType::BRACKET_OPEN ) {
         auto expr = terminal_expression( it );
-        RETURN_IF_ERROR( expr );
-        RETURN_IF_ERROR( consume( it, { TokenType::BRACKET_CLOSE } ) );
-        return std::make_unique<TerminalExpr>( std::get<TerminalExpr>(expr) );
+        RETURN_IF_ERROR( expr, it, begin );
+        RETURN_IF_ERROR( consume( it, { TokenType::BRACKET_CLOSE } ), it, begin );
+        return new TerminalExpr{std::get<TerminalExpr>(expr)};
     }
     return std::get<Token>(token);
 }
 
 std::variant<TerminalPrefix, ParseError> terminal_prefix( std::vector<Token>::const_iterator & it ) {
+    auto begin = it;
     TerminalPrefix prefix;
     prefix.op = match( it, { TokenType::EXCLAMATION_MARK } );
 
     auto primary = terminal_primary( it );
-    if ( std::holds_alternative<ParseError>(primary) )
-        return std::get<ParseError>(primary);
-    prefix.child = std::move(std::get<TerminalPrimary>(primary));
+    RETURN_IF_ERROR( primary, it, begin );
+    prefix.child = std::get<TerminalPrimary>(primary);
 
     return prefix;
 }
 
 std::variant<TerminalPostfix, ParseError> terminal_postfix( std::vector<Token>::const_iterator & it ) {
+    auto begin = it;
     TerminalPostfix postfix;
     
     auto prefix = terminal_prefix( it );
-    if ( std::holds_alternative<ParseError>(prefix) )
-        return std::get<ParseError>(prefix);
-    postfix.child = std::move(std::get<TerminalPrefix>(prefix));
+    RETURN_IF_ERROR( prefix, it, begin );
+    postfix.child = std::get<TerminalPrefix>(prefix);
 
     postfix.op = match( it, { TokenType::STAR, TokenType::PLUS, TokenType::QUESTION_MARK } );
 
@@ -81,78 +151,86 @@ std::variant<TerminalPostfix, ParseError> terminal_postfix( std::vector<Token>::
 }
 
 std::variant<TerminalOr, ParseError> terminal_or( std::vector<Token>::const_iterator & it ) {
+    auto begin = it;
     TerminalOr term_or;
     auto postfix = terminal_postfix( it );
-    if ( std::holds_alternative<ParseError>(postfix) )
-        return std::get<ParseError>(postfix);
-    term_or.children.push_back( std::move(std::get<TerminalPostfix>(postfix)) );
+    RETURN_IF_ERROR( postfix, it, begin );
+    term_or.children.push_back( std::get<TerminalPostfix>(postfix));
     
     while ( match( it, { TokenType::BAR } ) ) {
         auto child = terminal_postfix( it );
-        if ( std::holds_alternative<ParseError>(child) )
-            return std::get<ParseError>(child);
-        term_or.children.push_back( std::move(std::get<TerminalPostfix>(child)) );
+        RETURN_IF_ERROR( child, it, begin );
+        term_or.children.push_back( std::get<TerminalPostfix>(child) );
     }
 
     return term_or;
 }
 
-
 std::variant<TerminalExpr, ParseError> terminal_expression( std::vector<Token>::const_iterator & it ) {
+    auto begin = it;
     TerminalExpr expr;
     auto term_or = terminal_or( it );
     while ( std::holds_alternative<TerminalOr>(term_or) ) {
-        expr.children.push_back( std::move(std::get<TerminalOr>(term_or)) );
+        expr.children.push_back( std::get<TerminalOr>(term_or) );
         term_or = terminal_or( it );
     }
-    if ( expr.children.empty() )
+    if ( expr.children.empty() ) {
+        it = begin;
         return std::get<ParseError>(term_or);
+    }
     return expr;
 }
 
 std::variant<Terminal, ParseError> terminal( std::vector<Token>::const_iterator & it ) {
+    auto begin = it;
     Terminal term;
 
     auto term_token = consume( it, { TokenType::TERMINAL } );
-    if ( std::holds_alternative<ParseError>(term_token) )
-        return std::get<ParseError>( term_token );
+    RETURN_IF_ERROR( term_token, it, begin );
 
     auto equal_token = consume( it, { TokenType::EQUALS } );
-    if ( std::holds_alternative<ParseError>(equal_token) )
-        return std::get<ParseError>( equal_token );
+    RETURN_IF_ERROR( equal_token, it, begin );
 
     auto expr = terminal_expression( it );
-    if ( std::holds_alternative<ParseError>(expr) )
-        return std::get<ParseError>( expr );
+    RETURN_IF_ERROR( expr, it, begin );
     
     term.terminal = std::get<Token>( term_token );
     term.expression = std::get<TerminalExpr>( expr );
 
-    return { };
+    return term;
 }
 
 std::variant<Gerb, ParseError> gerb( std::vector<Token>::const_iterator & it ) {
     Gerb gerb;
 
     while ( !match( it, { TokenType::END_OF_FILE } ) ) {
+        std::optional<ParseError> error;
         auto term = terminal( it );
-        if ( !std::holds_alternative<ParseError>(term) )
+        if ( std::holds_alternative<Terminal>(term) ) {
             gerb.terminals.push_back( std::get<Terminal>(term) );
-        else {
+        } else {
+            error = std::get<ParseError>(term);
             auto nonterm = non_terminal( it );
-            if ( !std::holds_alternative<ParseError>(nonterm) )
+            if ( std::holds_alternative<NonTerminal>(nonterm) ) {
                 gerb.non_terminals.push_back( std::get<NonTerminal>(nonterm) );
-            else
-                return std::get<ParseError>(term) | std::get<ParseError>(nonterm);
+            } else {
+                if ( error.value().location < std::get<ParseError>(nonterm).location )
+                    error = std::get<ParseError>(nonterm);
+            }
         }
-        RETURN_IF_ERROR( consume(it, {TokenType::NEWLINE}) );
+        auto newline = consume(it, {TokenType::NEWLINE});
+        if ( std::holds_alternative<ParseError>( newline ) ) {
+            if ( error.has_value() )
+                return error.value();
+            return std::get<ParseError>( newline );
+        }
     }
-    RETURN_IF_ERROR( consume(it, {TokenType::END_OF_FILE}) );
 
     return gerb;
 }
 
-Gerb parse( const std::vector<Token> & tokens ) {
+
+std::variant<Gerb, ParseError> parse( const std::vector<Token> & tokens ) {
     auto it = tokens.begin();
-    return std::get<Gerb>(gerb( it ));
+    return gerb( it );
 }

@@ -9,4 +9,7 @@ enum class TokenType {
 struct Token {
     TokenType type;
     std::string capture;
+    std::string::const_iterator start;
 };
+
+namespace std { string to_string( TokenType ); }
