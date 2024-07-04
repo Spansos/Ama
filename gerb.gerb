@@ -9,6 +9,11 @@
 ;   'terminal' = "\n" | "\\n"
 ;   ALL_CAPS   = [captures what it matches]
 ;   ''        = "ignore"
+; possible errors
+;   two nonterminals starting with some overlap in characters (could be fixed)
+;   the first element of every option of the first or must not be optional (could be fixed)
+;   some repeating postfix being followed by something thats a subset of whats repeating (e.g, "\"" .* "\"". . includes ") (actually allowed, just doesnt do what i/you want)
+;   two terminals with the same name (may be changed)
 
 '('  = "("
 ')'  = ")"
@@ -21,9 +26,9 @@
 '.'  = "."
 'eof'= "\0"
 '\n' = "\n"
-''  = [ \t]+ | ";" .* "\n"
-EXACT        = "\"" !"\""* "\""
-UNION        = "[" !"]"* "]"
+''  = [ \t]+ | ( ";" .* "\n" )
+EXACT        = "\"" !"\""+ "\""
+UNION        = "[" !"]"+ "]"
 NON_TERMINAL = [abcdefghijklmnopqrstuvwxyz-]+
 TERMINAL     = ("'" !"'"* "'") | [ABCDEFGHIJKLMNOPQRSTUVWXYZ_]+
 
@@ -36,6 +41,10 @@ TERMINAL     = ("'" !"'"* "'") | [ABCDEFGHIJKLMNOPQRSTUVWXYZ_]+
 ;   ()
 ;   * ? +
 ;   |
+; possible errors
+;   two rules with the same name
+;   a repeating/optional part of a rule sometimes being able to be matched by another rule (e.g, a = b b*. b* can be matched by a) (error could be made stricter)
+;   a rule that is used in multiple other rules being used without other non-optional parts which arent in the other rules
 
 gerb = ( ( token '\n' ) | ( rule '\n' ) | '\n' )* 'eof'
 
@@ -45,7 +54,7 @@ token-expr    = token-or+
 token-or      = token-postfix ( '|' token-postfix )*
 token-postfix = token-prefix ( '*' | '+' | '?' )?
 token-prefix  = '!'? token-primary
-token-primary = '(' token-expr ')' | EXACT | UNION | '.'
+token-primary = ( '(' token-expr ')' ) | EXACT | UNION | '.'
 
 ; non-terminal rules
 rule         =   NON_TERMINAL '=' rule-expr

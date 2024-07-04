@@ -8,7 +8,7 @@ struct CCode {
     std::string code;
 };
 
-CCode GenerateToken( const Gerb & gerb );
-CCode GenerateLexer( const Gerb & gerb );
-CCode GenerateAST( const Gerb & gerb );
-CCode GenerateParser( const Gerb & gerb );
+CCode CompileToken( const Gerb & gerb );
+CCode CompileLexer( const Gerb & gerb );
+CCode CompileAST( const Gerb & gerb );
+CCode CompileParser( const Gerb & gerb );
