@@ -28,7 +28,7 @@ Gerb gerb( const std::string & gerb ) {
     std::ofstream token_cpp_file{ "out/token.c" };
     std::ofstream token_hpp_file{ "out/token.h" };
 
-    CCode tokens_code = CompileToken( ast );
+    CCode tokens_code = compile_token( ast );
     token_cpp_file << tokens_code.code;
     token_hpp_file << tokens_code.header;
 
@@ -36,7 +36,7 @@ Gerb gerb( const std::string & gerb ) {
     std::ofstream lexer_cpp_file{ "out/lexer.c" };
     std::ofstream lexer_hpp_file{ "out/lexer.h" };
 
-    CCode lexer_code = CompileLexer( ast );
+    CCode lexer_code = compile_lexer( ast );
     lexer_cpp_file << lexer_code.code;
     lexer_hpp_file << lexer_code.header;
 

@@ -10,7 +10,8 @@
 ;   ALL_CAPS   = [captures what it matches]
 ;   ''        = "ignore"
 ; possible errors
-;   two nonterminals starting with some overlap in characters (could be fixed)
+;   two terminals starting with some overlap in characters (could be fixed)
+;   two options in an or having an overlap in characters
 ;   the first element of every option of the first or must not be optional (could be fixed)
 ;   some repeating postfix being followed by something thats a subset of whats repeating (e.g, "\"" .* "\"". . includes ") (actually allowed, just doesnt do what i/you want)
 ;   two terminals with the same name (may be changed)
@@ -31,6 +32,14 @@ EXACT        = "\"" !"\""+ "\""
 UNION        = "[" !"]"+ "]"
 NON_TERMINAL = [abcdefghijklmnopqrstuvwxyz-]+
 TERMINAL     = ("'" !"'"* "'") | [ABCDEFGHIJKLMNOPQRSTUVWXYZ_]+
+
+; switch ( code[begin] ) {
+;   struct token token;
+;   case '\'' :
+;       break;
+;   case 'A': case 'B': case 'C': ...
+;       break;
+; }
 
 ; gerb rules syntax
 ;   non-terminal = non-terminal
