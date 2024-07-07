@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <unordered_set>
+#include <sstream>
 #include <limits>
 
 std::string capture_to_enum( std::string capture ) {
@@ -11,21 +12,11 @@ std::string capture_to_enum( std::string capture ) {
 }
 
 std::string escape_characters( std::string string ) {
-    std::string r;
-    for ( const auto & c : string ) {
-        if ( c == '\'' || c == '"' ) {
-            r += '\\';
-            r += c;
-        } else if ( c == '\n' )
-            r += "\\n";
-        else if ( c == '\0' )
-            r += "\\0";
-        else if ( c == '\t' )
-            r += "\\t";
-        else
-            r += c;
+    std::stringstream r;
+    for ( int c : string ) {
+        r << "\\x" << std::hex << c;
     }
-    return r;
+    return r.str();
 }
 
 std::string interpret_string( std::string string ) {
@@ -61,58 +52,6 @@ std::string indent( std::string string, int space_count ) {
     }
     return r;
 }
-
-// std::unordered_set<char> terminal_start_chars( const TerminalExpr & expr ) {
-//     std::unordered_set<char> r;
-//     // go over all children of first child
-//     for ( const auto & postfix : expr.children[0].children ) {
-//         // if any has postfix (= is optional), error
-//         if ( postfix.op.has_value() && postfix.op.value().type != TokenType::PLUS ) {
-//             throw std::runtime_error( "First character may not be optional." );
-//         }
-//         const auto & primary = postfix.child.child;
-//         // if primary is a token
-//         if ( std::holds_alternative<Token>( primary ) ) {
-//             const Token & token = std::get<Token>( primary );
-//             switch ( token.type ) {
-//             // if token is '.'
-//             case TokenType::DOT:
-//                 for ( int i = 0; i <= std::numeric_limits<char>::max(); i++ ) {
-//                     char c = static_cast<char>(i);
-//                     r.insert( c );
-//                 }
-//                 break;
-//             // if token is an exact match
-//             case TokenType::EXACT:
-//                 for ( char c : interpret_string( std::string( token.capture.substr( 1, token.capture.length()-2 ) ) ) )
-//                     r.insert( c );
-//                 break;
-//             // if token is a union
-//             case TokenType::UNION:
-//                 for ( char c : interpret_string( token.capture.substr( 1, token.capture.length()-2 ) ) )
-//                     r.insert( c );
-//                 break;
-//             // other, just error
-//             default:
-//                 throw std::runtime_error( "Token was not token" );
-//             }
-//         // if primary is a expression
-//         } else {
-//             r = terminal_start_chars( *std::get<TerminalExpr*>( primary ) );
-//         }
-//         // if negated (prefixed by !)
-//         if ( postfix.child.op.has_value() ) {
-//             for ( int i = 0; i <= std::numeric_limits<char>::max(); i++ ) {
-//                 char c = static_cast<char>(i);
-//                 if ( r.count( c ) )
-//                     r.erase( c );
-//                 else
-//                     r.insert( c );
-//             }
-//         }
-//     }
-//     return r;
-// }
 
 CCode compile_token( const Gerb & gerb ) {
     CCode code;
@@ -244,26 +183,93 @@ std::unordered_set<char> terminal_expr_start_chars( const TerminalExpr & termina
     return terminal_or_start_chars( terminal_expr.children[0] );
 }
 
+std::string compile_terminal_prefix( const TerminalPrefix & terminal_prefix ) {
+    std::string code = "if ( ";
+    auto start_chars = terminal_prefix_start_chars( terminal_prefix );
+    auto it = start_chars.begin( );
+    code += "code[cur] == '" + escape_characters( std::string{*it++} ) + "' ";
+    // auto start_chars.;
+    for ( ; it != start_chars.end(); it ++ )
+        code += "|| code[cur] == '" + escape_characters( std::string{*it} ) + "' ";
+    code += ") token.length++;\n";
+    return code;
+}
+
+std::string compile_terminal_postfix( const TerminalPostfix & terminal_postfix ) {
+    std::string code;
+    if ( !terminal_postfix.op )
+        return compile_terminal_prefix( terminal_postfix.child );
+    switch ( terminal_postfix.op.value().type ) {
+        case TokenType::PLUS:
+            code += "while ( true ) {\n";
+            code += indent( compile_terminal_prefix( terminal_postfix.child ), 4 );
+            code += "}\n";
+            break;
+        case TokenType::STAR:
+            code += "while ( true ) {\n";
+            code += indent( compile_terminal_prefix( terminal_postfix.child ), 4 );
+            code += "}\n";
+            break;
+        case TokenType::QUESTION_MARK:
+            code += compile_terminal_prefix( terminal_postfix.child );
+            break;
+        default:
+            throw std::runtime_error( "Token not token" );
+    }
+    return code;
+}
+
+std::string compile_terminal_or( const TerminalOr & terminal_or ) {
+    std::string code;
+    code += "switch ( code[cur] ) {\n";
+    for ( const auto & terminal_postfix : terminal_or.children ) {
+        for ( char c : terminal_postfix_start_chars( terminal_postfix ) )
+            code += "case '" + escape_characters( std::string{c} ) + "': ";
+        code += "\n";
+        code += indent( compile_terminal_postfix( terminal_postfix ), 4 );
+        code += "    break;\n";
+    }
+    code += "}\n";
+    return code;
+}
+
+std::string compile_terminal_expr( const TerminalExpr & terminal_expr ) {
+    std::string code;
+    for ( const auto & terminal_or : terminal_expr.children ) {
+        code += "{\n";
+        code += indent( compile_terminal_or( terminal_or ), 4 );
+        code += "}\n";
+    }
+    return code;
+}
+
 std::string compile_terminal( const Terminal & terminal ) {
-    std::string r;
+    std::string code;
     for ( char c : terminal_expr_start_chars( terminal.expression ) )
-        r += "case '" + escape_characters( std::string{c} ) ;
-    return "\"" + r + "\"\n";
+        code += "case '" + escape_characters( std::string{c} ) + "': ";
+    code += "{\n";
+    code += "    token.type = " + capture_to_enum( terminal.terminal.capture ) + ";\n";
+    code += indent( compile_terminal_expr( terminal.expression ), 4 );
+    code += "    break;\n";
+    code += "}\n";
+    return code;
 }
 
 std::string compile_terminals( const std::vector<Terminal> & terminals ) {
     std::string code =
         "size_t cur = 0;\n"
-        "struct token token;\n"
         "while ( code[cur] != '\\0' ) {\n"
+        "    struct token token = (struct token){ .type=-1, .start=cur, .length=0 };\n"
         "    switch ( code[cur] ) {\n";
 
     for ( const auto & terminal : terminals )
         code += indent( compile_terminal( terminal ), 4 );
 
+
     code +=
+        "    error:\n"
         "    default:\n"
-        "        break;\n"
+        "        token.length = 0;\n"
         "    }\n"
         "}\n"
         "if ( token.length == 0 ) {\n"
