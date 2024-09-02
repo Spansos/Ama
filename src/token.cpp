@@ -2,8 +2,8 @@
 
 Token::Token (
     TokenType type,
-    int start
+    size_t start
 ) :
-    type(type),
-    start(start)
+    start(start),
+    type(type)
 { }
