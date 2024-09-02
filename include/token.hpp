@@ -13,87 +13,77 @@
 
 enum class TokenType
 {
-    // types & variables
-    identifier,
-    asterisk,
-    ampersand,
-    // general or various uses
-    colon,
-    dot,
-    comma,
-    semicolon,
-    // literals
-    int_,
-    float_,
-    string_,
-    // operators
-    asignment,
-    equal,
-    greater,
-    lesser,
-    greaterequal,
-    lesserequal,
-    or_,
-    and_,
-    xor_,
-    minus,
-    plus,
-    divide,
-    idivide,
-    modulo,
-    not_,
-    qmark,
-    rshift,
-    lshift,
-    bor,
-    band,
-    bxor,
-    bnot,
-    // assignment operators
-    ora,
-    anda,
-    xora,
-    minusa,
-    plusa,
-    timesa,
-    dividea,
-    idividea,
-    moduloa,
-    nota,
-    qmarka,
-    rshifta,
-    lshifta,
-    bora,
-    banda,
-    bxora,
-    bnota,
+    IDENTIFIER,
+    COLON,
+    DOT,
+    COMMA,
+    SEMICOLON,
+    INT,
+    FLOAT,
+    STRING,
+    ASSIGNMENT,
+    EQUAL,
+    GREATER,
+    LESSER,
+    GREATER_EQUAL,
+    LESSER_EQUAL,
+    OR,
+    AND,
+    XOR,
+    MINUS,
+    PLUS,
+    DIVIDE,
+    INTIGER_DIVIDE,
+    MODULUS,
+    NOT,
+    QUESTION_MARK,
+    RIGHT_SHIGHT,
+    LEFT_SHIFT,
+    BIT_OR,
+    BIT_AND,
+    BIT_XOR,
+    BIT_NOT,
+    REFERENCE,
+    DEREFERENCE,
+    REFERNECE_ASSIGNMENT,
+    DEREFERENCE_ASSIGNMENT,
+    OR_ASSIGNMENT,
+    AND_ASSIGNMENT,
+    XOR_ASSIGNMENT,
+    MINUS_ASSIGNMENT,
+    PLUS_ASSIGNMENT,
+    TIMES_ASSIGNMENT,
+    DIVIDE_ASSIGNMENT,
+    INTIGER_DIVIDE_ASSIGNMENT,
+    MODULUS_ASSIGNMENT,
+    NOT_ASSIGNMENT,
+    QUESTION_MARK_ASSIGNMENT,
+    RIGHT_SHIFT_ASSIGNMENT,
+    LEFT_SHIFT_ASSIGNMENT,
+    BINARY_OR_ASSIGNMENT,
+    BINARY_AND_ASSIGNMENT,
+    BINARY_XOR_ASSIGNMENT,
+    BINARY_NOT_ASSIGNMENT,
     // brackets
-    bropen,
-    brclose,
-    sqrbropen,
-    sqrbrclose,
-    curbropen,
-    curbrclose,
+    BRACKET_OPEN,
+    BRACKET_CLOSE,
+    SQUARE_BRACKET_OPEN,
+    SQUARE_BRACKET_CLOSE,
+    CURLY_BRACKET_OPEN,
+    CURLY_BRACKET_CLOSE,
     // non-code
-    whitespace,
-    comment,
-    eof
+    WHITESPACE,
+    COMMENT,
+    END_OF_FILE
 };
 
 
-class Token
+struct Token
 {
-public:
     Token (
         TokenType type,
-        const std::string & code,
-        int start,
-        int length
+        int start
     );
-    std::string value( ) const;
-    int end( ) const;
-    int start, length;
+    int start;
     TokenType type;
-private:
-    const std::string * _code;
 };

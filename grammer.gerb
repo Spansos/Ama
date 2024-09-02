@@ -11,7 +11,7 @@
 ;   binary binary   | & ^
 ;   comparison      == !== > < >== <==
 ;   logical         || && ^^
-;   assignment      = -= += *= /= //= %= != >>= <<= |= &= ^= ~= != >= <= >=== <=== a?b:c a?=b:c
+;   assignment      = -= += *= /= //= %= != >>= <<= |= &= ^= ~= != >= = >=== <===< a?b:c a?=b:c
 expression      = assignment
 assignment      = logical ( ( '=' | '-=' | '+=' | '/=' | '//=' | '%=' | '!=' | '>>=' | '<<=' | '|=' | '&=' | '^=' | '~=' | '!=' | '>=' | '<=' | '>===' | '<===' ) logical )* | logical ( '?' | '?=' ) logical ':' logical
 logical         = comparison ( ( '||' | '&&' | '^^' ) comparison )*

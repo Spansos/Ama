@@ -19,10 +19,12 @@ all: bin/main.out
 
 run: bin/main.out
 	./bin/main.out
+	( cd out && make run )
 
 clean:
 	rm obj/* -rf
 	rm bin/* -rf
+	( cd out && make clean )
 
 obj/%.o: src/%.cpp $(HEADERS)
 	mkdir -p $(dir $@)

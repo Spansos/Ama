@@ -62,8 +62,10 @@ int main() {
 // templates
 struct P[type t, int i] {
     t test;
-    vector<int, i> list;
+    vector[int, i] list;
 };
+
+p[i32, 4] foo;
 
 // type qualifiers
 * i32       /* pointer to i32 */
@@ -73,7 +75,7 @@ var * i32   /* non-static pointer to i32 */
 &*var*var i32 /* reference to pointer to non-static pointer to non-static i32 */
 
 // [bytec] can be used to allocate memory statically / on the stack
-* i32 p = [4];
+* i32 p = [4]; // pointer to 4 bytes on the stack
 // arrays can be made by using [] in its type
 var [8] i32 ar;
 // this is equal to
