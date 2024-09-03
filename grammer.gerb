@@ -21,7 +21,7 @@ binary-shift    = binary-add ( ( '<<' | '>>' ) binary-add )*
 binary-add      = binary-mult ( ( '+' | '-' ) binary-mult )*
 binary-mult     = unary-prefix ( ( '*' | '/' | '//' | '%' ) unary-prefix )*
 unary-prefix    = ( '*' | '&' | '-' | '+' | '!' | '~' ) unary-prefix | unary-postfix
-unary-postfix   = unary-postfix '(' arguments ')' | unary-postfix '[' expression ']' | primary
+unary-postfix   = primary '(' arguments ')' | primary '[' expression ']' | primary
 primary         = INT | FLOAT | STRING | IDENTIFIER | '(' expression ')'
 
 arguments = expression (',' expression)*
