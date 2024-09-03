@@ -1,18 +1,17 @@
 #pragma once
 
 #include <vector>
-#include <optional>
 #include "token.hpp"
 
 struct ExpressionNode;
 
 struct Primary {
     union {
-        Token token;
+        Token literal;
         ExpressionNode * expression;
     };
     enum {
-        TOKEN,
+        LITERAL,
         EXPRESSION
     } type;
 };
@@ -30,7 +29,7 @@ struct UnaryPostfix {
     union {
         Function function;
         Index index;
-        Primary nop;
+        Primary * nop;
     };
 
     enum {
@@ -40,15 +39,33 @@ struct UnaryPostfix {
     } type;
 };
 
+struct UnaryPrefix {
+    struct Prefix {
+        UnaryPrefix * node;
+        Token op;
+    };
+    
+    union {
+        Prefix prefix;
+        UnaryPostfix * nop;
+    };
+
+    enum {
+        PREFIX,
+        NOP
+    } type;
+};
+
 struct BinaryMultNode {
-    UnaryPostfix * node;
-    std::optional<Token> op;
+    UnaryPrefix * lhs;
+    BinaryMultNode * rhs;
+    Token op;
 };
 
 struct BinaryAddNode {
-    BinaryAddNode * lhs;
-    BinaryMultNode * rhs;
-    Token token;
+    BinaryMultNode * lhs;
+    BinaryAddNode * rhs;
+    Token op;
 };
 
 struct BinaryShiftNode {
@@ -91,7 +108,7 @@ struct AssignmentNode {
     union {
         Ternary ternary;
         Assignment assignment;
-        LogicalNode nop;
+        LogicalNode * nop;
     };
 
     enum {

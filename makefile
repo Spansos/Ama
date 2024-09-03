@@ -1,4 +1,4 @@
-CC     := g++ -std=c++20
+CC     := g++ -std=c++23
 CFLAGS := -g -Wall -Wextra -Wpedantic -Werror -Og -Iinclude
 
 # cpp and header files from own project
@@ -19,12 +19,10 @@ all: bin/main.out
 
 run: bin/main.out
 	./bin/main.out
-	( cd out && make run )
 
 clean:
 	rm obj/* -rf
 	rm bin/* -rf
-	( cd out && make clean )
 
 obj/%.o: src/%.cpp $(HEADERS)
 	mkdir -p $(dir $@)

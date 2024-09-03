@@ -62,10 +62,6 @@ std::string token_content(const Token token, const std::string & code) {
         case TokenType::TIMES_ASSIGNMENT:
         case TokenType::DIVIDE_ASSIGNMENT:
         case TokenType::QUESTION_MARK_ASSIGNMENT:
-        case TokenType::BINARY_OR_ASSIGNMENT:
-        case TokenType::BINARY_AND_ASSIGNMENT:
-        case TokenType::BINARY_XOR_ASSIGNMENT:
-        case TokenType::BINARY_NOT_ASSIGNMENT:
             end += 2;
             break;
             
@@ -78,6 +74,7 @@ std::string token_content(const Token token, const std::string & code) {
         case TokenType::INTIGER_DIVIDE_ASSIGNMENT:
         case TokenType::RIGHT_SHIFT_ASSIGNMENT:
         case TokenType::LEFT_SHIFT_ASSIGNMENT:
+        case TokenType::NOT_EQUAL:
             end += 3;
             break;
 

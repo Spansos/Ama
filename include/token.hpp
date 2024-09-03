@@ -23,6 +23,7 @@ enum class TokenType
     STRING,
     ASSIGNMENT,
     EQUAL,
+    NOT_EQUAL,
     EQUAL_ASSIGNMENT,
     GREATER,
     LESSER,
@@ -70,10 +71,6 @@ enum class TokenType
     QUESTION_MARK_ASSIGNMENT,
     RIGHT_SHIFT_ASSIGNMENT,
     LEFT_SHIFT_ASSIGNMENT,
-    BINARY_OR_ASSIGNMENT,
-    BINARY_AND_ASSIGNMENT,
-    BINARY_XOR_ASSIGNMENT,
-    BINARY_NOT_ASSIGNMENT,
     BRACKET_OPEN,
     BRACKET_CLOSE,
     SQUARE_BRACKET_OPEN,
@@ -88,6 +85,7 @@ enum class TokenType
 
 struct Token
 {
+    Token();
     Token (
         TokenType type,
         size_t start
