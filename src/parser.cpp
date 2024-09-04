@@ -1,6 +1,7 @@
 #include "parser.hpp"
 
 #include <expected>
+#include <iostream>
 
 enum class ParseError {
 
@@ -55,7 +56,7 @@ std::expected<std::vector<ExpressionNode*>,ParseError> parse_arguments(
     arguments.push_back(parse_expression(token_iterator).value());
     while (token_iterator++->type == TokenType::COMMA)
         arguments.push_back(parse_expression(token_iterator).value());
-    
+
     return arguments;
 }
 
@@ -63,8 +64,9 @@ std::expected<UnaryPostfix*, ParseError> parse_unary_postfix(
     std::vector<Token>::const_iterator & token_iterator
 ) {
     Primary * primary = parse_primary(token_iterator).value();
-    switch (token_iterator++->type) {
+    switch ((++token_iterator)->type) {
         case TokenType::BRACKET_OPEN:
+            token_iterator++;
             return new UnaryPostfix{
                 .function = UnaryPostfix::Function{
                     .node = primary,
@@ -73,6 +75,7 @@ std::expected<UnaryPostfix*, ParseError> parse_unary_postfix(
                 .type = UnaryPostfix::FUNCTION
             };
         case TokenType::SQUARE_BRACKET_OPEN:
+            token_iterator++;
             return new UnaryPostfix{
                 .index = UnaryPostfix::Index{
                     .node = primary,
@@ -81,7 +84,6 @@ std::expected<UnaryPostfix*, ParseError> parse_unary_postfix(
                 .type = UnaryPostfix::INDEX
             };
         default:
-            token_iterator--;
             return new UnaryPostfix{
                 .nop = primary,
                 .type = UnaryPostfix::NOP
@@ -305,7 +307,11 @@ std::expected<AssignmentNode*,ParseError> parse_assignment(
 
 
         default:
-            return std::unexpected{ParseError{}};
+            token_iterator--;
+            return new AssignmentNode{
+                .nop = lhs.value(),
+                .type = AssignmentNode::NOP
+            };
     }
 }
 
