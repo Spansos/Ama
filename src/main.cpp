@@ -5,16 +5,13 @@
 
 int main( )
 {
-    std::string code = "2*4";
+    std::string code = "wowzers<===3";
     std::vector<Token> tokens = lex(code);
     tokens.pop_back();
     for (const Token token : tokens) std::cout << '<' << (int)token.type << ':' << token_content(token, code) << '>' << '\n';
 
     ExpressionNode ast = parse(tokens);
-    (void)ast;
-
+    std::cout << ast.serialize() << std::endl;
 
     return 0;
-
-
 }

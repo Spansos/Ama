@@ -82,6 +82,7 @@ enum class TokenType
     END_OF_FILE
 };
 
+std::string serialize(TokenType token_type);
 
 struct Token
 {

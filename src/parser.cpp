@@ -64,7 +64,7 @@ std::expected<UnaryPostfix*, ParseError> parse_unary_postfix(
     std::vector<Token>::const_iterator & token_iterator
 ) {
     Primary * primary = parse_primary(token_iterator).value();
-    switch ((++token_iterator)->type) {
+    switch (token_iterator->type) {
         case TokenType::BRACKET_OPEN:
             token_iterator++;
             return new UnaryPostfix{
@@ -143,7 +143,7 @@ std::expected<BinaryAddNode*, ParseError> parse_binary_add(
     auto lhs = parse_binary_mult(token_iterator);
 
     Token token = *token_iterator;
-    if (token.type == TokenType::LEFT_SHIFT || token.type == TokenType::RIGHT_SHIFT) {
+    if (token.type == TokenType::PLUS || token.type == TokenType::MINUS) {
         token_iterator++;
         return new BinaryAddNode{
             .lhs = lhs.value(),
