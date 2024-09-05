@@ -1,11 +1,4 @@
-#include "parser.hpp"
-
-#include <expected>
-#include <iostream>
-
-enum class ParseError {
-
-};
+#include "parser/expression.hpp"
 
 // binary-binary   = binary-shift ( ( '|' | '&' | '^' ) binary-shift )*
 // binary-shift    = binary-add ( ( '<<' | '>>' ) binary-add )*
@@ -322,12 +315,4 @@ std::expected<ExpressionNode*,ParseError> parse_expression (
     return new ExpressionNode {
         .node = parse_assignment(token_iterator).value()
     };
-}
-
-
-ExpressionNode parse (
-    const std::vector<Token> & tokens
-) {
-    auto it = tokens.begin();
-    return *parse_expression(it).value();
 }
