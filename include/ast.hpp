@@ -133,3 +133,112 @@ struct ExpressionNode {
     std::string serialize();
     AssignmentNode * node;
 };
+
+struct BlockNode {
+    std::vector<StatementNode*> statements;
+};
+
+// type        = 'var'? ( ( '&'|'*' type ) | IDENTIFIER )
+struct TypeNode {
+    bool var;
+
+    union {
+        TypeNode * pointer;
+        TypeNode * reference;
+        Token * identifier;
+    };
+
+    enum {
+        POINTER,
+        REFERENCE,
+        IDENTIFIER
+    } type;
+};
+
+struct Declaration;
+
+// enum-definition = 'enum' IDENTIFIER '{' (type? IDENTIFIER ';')* '}'
+struct EnumNode {
+    Token identifier;
+    std::vector<Declaration*> members;
+};
+
+// struct-definition = 'struct' IDENTIFIER '{' (variable-declaration | struct-defintion | enum-definition ';')* '}'
+struct StructNode {
+    Token identifier;
+    std::vector<Declaration*> members;
+};
+
+// func-definition = type IDENTIFIER '(' arguments ')' 'var'? statement
+struct FuncNode {
+    TypeNode return_type;
+    Token identifier;
+    std::vector<VarDeclNode*> parameters;
+    StatementNode * body;
+};
+
+// variable-declaration = type IDENTIFIER ('=' expression)?
+struct VarDeclNode {
+    Token identifier;
+    TypeNode * type;
+    ExpressionNode * value;
+};
+
+struct Declaration {
+    union {
+        StructNode * struct_decl;
+        FuncNode * func_decl;
+        VarDeclNode * var_decl;
+    };
+    enum {
+        STRUCT_DECL,
+        FUNC_DECL,
+        VAR_DECL
+    } type;
+};
+
+// do-while    = 'do' statement 'while' '(' expression ')'
+struct DoWhileNode {
+    ExpressionNode * condition;
+    StatementNode * body;
+};
+
+// while       = 'while' '(' expression ')' statement
+struct WhileNode {
+    ExpressionNode * condition;
+    StatementNode * body;
+};
+
+// for         = 'for' '(' statement expression ';' statement ')' statement
+struct ForNode {
+    StatementNode * start;
+    ExpressionNode * condition;
+    StatementNode * update;
+    StatementNode * body;
+};
+
+// ( (variable-declaration | expression)? ';' ) | for | while | do-while | func-definition | struct-definition | enum-definition | code-block
+struct StatementNode {
+    union {
+        VarDeclNode * var_decl;
+        ExpressionNode * expression;
+        ForNode * for_loop;
+        WhileNode * while_loop;
+        DoWhileNode * do_while_loop;
+        FuncNode * func;
+        StructNode * struct_decl;
+        EnumNode * enum_decl;
+        BlockNode * code_block;
+    };
+    enum {
+        VAR_DECL,
+        EXPRESSION,
+        FOR_LOOP,
+        WHILE_LOOP,
+        DO_WHILE_LOOP,
+        FUNC,
+        STRUCT_DECL,
+        ENUM_DECL,
+        CODE_BLOCK
+    } type;
+};

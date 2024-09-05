@@ -1,5 +1,13 @@
-; statement   = ( expression ';' ) | <code-block>
-; code-block  = { statement* }
+enum-definition = 'enum' IDENTIFIER '{' (type? IDENTIFIER ';')* '}'
+struct-definition = 'struct' IDENTIFIER '{' (variable-declaration ';')* '}'
+func-definition = type IDENTIFIER '(' arguments ')' 'var'? statement
+do-while    = 'do' statement 'while' '(' expression ')'
+while       = 'while' '(' expression ')' statement
+for         = 'for' '(' statement expression ';' statement ')' statement
+type        = 'var'? ( ( '&'|'*' type ) | IDENTIFIER )
+variable-declaration = type IDENTIFIER ('=' expression)?
+statement   = ( (variable-declaration | expression)? ';' ) | for | while | do-while | func-definition | struct-definition | enum-definition | code-block
+code-block  = { statement* }
 
 
 ; precedence rules
