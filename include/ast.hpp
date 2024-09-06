@@ -145,7 +145,7 @@ struct TypeNode {
     union {
         TypeNode * pointer;
         TypeNode * reference;
-        Token * identifier;
+        Token identifier;
     };
 
     enum {
