@@ -7,6 +7,6 @@
 #include "token.hpp"
 #include "ast.hpp"
 
-std::expected<ExpressionNode*,ParseError> parse_statement (
+std::expected<StatementNode*,ParseError> parse_statement (
     std::vector<Token>::const_iterator & token_iterator
 );
