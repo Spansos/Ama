@@ -1,5 +1,3 @@
-#pragma once
-
 #include "parser/expression.hpp"
 #include "parser/statement.hpp"
 
@@ -9,6 +7,8 @@ std::expected<BlockNode*,ParseError> parse_block (
     std::vector<Token>::const_iterator & token_iterator,
     const std::string & code
 ) {
+    (void)code;
+
     BlockNode * node = new BlockNode;
     
     auto begin_it = token_iterator;
@@ -20,7 +20,7 @@ std::expected<BlockNode*,ParseError> parse_block (
     while (auto statement = parse_statement(token_iterator))
         node->statements.push_back(statement.value());
     
-    auto bracket = match(begin_it, token_iterator, {TokenType::CURLY_BRACKET_CLOSE});
+    bracket = match(begin_it, token_iterator, {TokenType::CURLY_BRACKET_CLOSE});
     if (!bracket)
         return std::unexpected{bracket.error()};
 
@@ -78,7 +78,12 @@ std::expected<EnumNode*,ParseError> parse_enum_definition (
     std::vector<Token>::const_iterator & token_iterator,
     const std::string & code
 ) {
+    auto begin_it = token_iterator;
     
+    auto enum_ = check(token_iterator, {TokenType::IDENTIFIER});
+    if (var && token_content(var.value(), code) == "var") {
+        token_iterator++;
+    }
 }
 
 // struct-definition = 'struct' IDENTIFIER '{' (variable-declaration ';')* '}'
@@ -148,7 +153,7 @@ std::expected<StatementNode*,ParseError> parse_statement (
         case TokenType::REFERENCE:
         case TokenType::DEREFERENCE: {
             StatementNode * r = new StatementNode{
-                .var_decl = parse_var_decl(token_iterator).value(),
+                .var_decl = parse_var_decl(token_iterator, code).value(),
                 .type = StatementNode::VAR_DECL
             };
             if (token_iterator++->type != TokenType::SEMICOLON)
@@ -157,7 +162,7 @@ std::expected<StatementNode*,ParseError> parse_statement (
         }
         case TokenType::CURLY_BRACKET_OPEN:
             return new StatementNode{
-                .code_block = parse_block(token_iterator).value(),
+                .code_block = parse_block(token_iterator, code).value(),
                 .type = StatementNode::CODE_BLOCK
             };
     }

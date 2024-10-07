@@ -134,6 +134,8 @@ struct ExpressionNode {
     AssignmentNode * node;
 };
 
+struct StatementNode;
+
 struct BlockNode {
     std::vector<StatementNode*> statements;
 };
@@ -169,19 +171,19 @@ struct StructNode {
     std::vector<Declaration*> members;
 };
 
+// variable-declaration = type IDENTIFIER ('=' expression)?
+struct VarDeclNode {
+    Token identifier;
+    TypeNode * type;
+    ExpressionNode * value;
+};
+
 // func-definition = type IDENTIFIER '(' arguments ')' 'var'? statement
 struct FuncNode {
     TypeNode return_type;
     Token identifier;
     std::vector<VarDeclNode*> parameters;
     StatementNode * body;
-};
-
-// variable-declaration = type IDENTIFIER ('=' expression)?
-struct VarDeclNode {
-    Token identifier;
-    TypeNode * type;
-    ExpressionNode * value;
 };
 
 struct Declaration {
