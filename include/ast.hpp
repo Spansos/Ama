@@ -157,18 +157,18 @@ struct TypeNode {
     } type;
 };
 
-struct Declaration;
+struct DeclarationNode;
 
 // enum-definition = 'enum' IDENTIFIER '{' (type? IDENTIFIER ';')* '}'
 struct EnumNode {
     Token identifier;
-    std::vector<Declaration*> members;
+    std::vector<DeclarationNode*> members;
 };
 
 // struct-definition = 'struct' IDENTIFIER '{' (variable-declaration | struct-defintion | enum-definition ';')* '}'
 struct StructNode {
     Token identifier;
-    std::vector<Declaration*> members;
+    std::vector<DeclarationNode*> members;
 };
 
 // variable-declaration = type IDENTIFIER ('=' expression)?
@@ -186,7 +186,7 @@ struct FuncNode {
     StatementNode * body;
 };
 
-struct Declaration {
+struct DeclarationNode {
     union {
         StructNode * struct_decl;
         FuncNode * func_decl;

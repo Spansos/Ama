@@ -81,9 +81,27 @@ std::expected<EnumNode*,ParseError> parse_enum_definition (
     auto begin_it = token_iterator;
     
     auto enum_ = check(token_iterator, {TokenType::IDENTIFIER});
-    if (var && token_content(var.value(), code) == "var") {
+    if (enum_ && token_content(enum_.value(), code) == "enum")
         token_iterator++;
+    else
+        return std::unexpected{ParseError::INVALID_TYPE};
+
+    auto identifier = match(begin_it, token_iterator, {TokenType::IDENTIFIER});
+    if (!identifier)
+        return std::unexpected{ParseError::INVALID_TYPE};
+
+    if (!match(begin_it, token_iterator, {TokenType::CURLY_BRACKET_OPEN}))
+        return std::unexpected{ParseError::INVALID_TYPE};
+
+    std::vector<DeclarationNode*> declarations;
+    while (auto declaration = parse_declaration(token_iterator, code)) {
+        declarations.push_back(declaration.value());
     }
+
+    if (!match(begin_it, token_iterator, {TokenType::CURLY_BRACKET_CLOSE}))
+        return std::unexpected{ParseError::INVALID_TYPE};
+
+    return std::unexpected{ParseError::INVALID_TYPE};
 }
 
 // struct-definition = 'struct' IDENTIFIER '{' (variable-declaration ';')* '}'
@@ -110,7 +128,7 @@ std::expected<VarDeclNode*,ParseError> parse_var_decl (
     
 }
 
-std::expected<Declaration*,ParseError> parse_declaration (
+std::expected<DeclarationNode*,ParseError> parse_declaration (
     std::vector<Token>::const_iterator & token_iterator,
     const std::string & code
 ) {
@@ -165,5 +183,7 @@ std::expected<StatementNode*,ParseError> parse_statement (
                 .code_block = parse_block(token_iterator, code).value(),
                 .type = StatementNode::CODE_BLOCK
             };
+        default:
+            
     }
 }
